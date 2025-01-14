@@ -29,9 +29,14 @@
       border-radius: 5px;
       cursor: pointer;
       font-size: 16px;
+      transition: background-color 0.3s ease;
     }
     .buttons button:hover {
       background-color: #0056b3;
+    }
+    .buttons button.active {
+      background-color: #004080; /* 更深的蓝色 */
+      font-weight: bold;
     }
     .gallery {
       display: grid;
@@ -66,10 +71,10 @@
 <body>
   <h1>Pixiv 排行榜图片展示</h1>
   <div class="buttons">
-    <button onclick="loadImages('m')">月榜</button>
-    <button onclick="loadImages('w')">周榜</button>
-    <button onclick="loadImages('d')">日榜</button>
-    <button onclick="loadImages('n')">新人榜</button>
+    <button onclick="loadImages('m')" id="btn-m">月榜</button>
+    <button onclick="loadImages('w')" id="btn-w">周榜</button>
+    <button onclick="loadImages('d')" id="btn-d">日榜</button>
+    <button onclick="loadImages('n')" id="btn-n">新人榜</button>
   </div>
   <div class="gallery" id="gallery"></div>
   <div class="loading" id="loading" style="display: none;">加载中...</div>
@@ -84,6 +89,9 @@
       gallery.innerHTML = ''; // 清空当前内容
       error.style.display = 'none'; // 隐藏错误提示
       loading.style.display = 'block'; // 显示加载提示
+
+      // 设置当前选中的按钮样式
+      setActiveButton(type);
 
       try {
         // 调用 API 获取图片链接
@@ -120,6 +128,19 @@
       } finally {
         // 隐藏加载提示
         loading.style.display = 'none';
+      }
+    }
+
+    // 设置当前选中的按钮样式
+    function setActiveButton(type) {
+      // 获取所有按钮
+      const buttons = document.querySelectorAll('.buttons button');
+      // 移除所有按钮的 active 类
+      buttons.forEach(button => button.classList.remove('active'));
+      // 为当前选中的按钮添加 active 类
+      const activeButton = document.getElementById(`btn-${type}`);
+      if (activeButton) {
+        activeButton.classList.add('active');
       }
     }
 
