@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pixiv 排行榜图片展示</title>
+  <link rel="icon" type="image/png" href="https://q2.qlogo.cn/headimg_dl?dst_uin=2973517380&amp;spec=5">
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -33,14 +34,14 @@
       background-color: #0056b3;
     }
     .gallery {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* 每列最小宽度 200px */
+      gap: 10px; /* 图片间距 */
       justify-content: center;
     }
     .gallery img {
-      max-width: 30%;
-      height: auto;
+      width: 100%; /* 图片宽度占满容器 */
+      height: auto; /* 高度自适应 */
       border-radius: 5px;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       transition: transform 0.2s;
@@ -52,6 +53,12 @@
       text-align: center;
       font-size: 18px;
       color: #666;
+      margin-top: 20px;
+    }
+    .error {
+      text-align: center;
+      font-size: 18px;
+      color: red;
       margin-top: 20px;
     }
   </style>
@@ -66,37 +73,50 @@
   </div>
   <div class="gallery" id="gallery"></div>
   <div class="loading" id="loading" style="display: none;">加载中...</div>
+  <div class="error" id="error" style="display: none;"></div>
 
   <script>
     // 加载图片的函数
     async function loadImages(type) {
-      // 显示加载提示
       const loading = document.getElementById('loading');
+      const error = document.getElementById('error');
       const gallery = document.getElementById('gallery');
       gallery.innerHTML = ''; // 清空当前内容
-      loading.style.display = 'block';
+      error.style.display = 'none'; // 隐藏错误提示
+      loading.style.display = 'block'; // 显示加载提示
 
       try {
         // 调用 API 获取图片链接
         const response = await fetch(`https://pxrank-api.onani.cn/${type}`);
         if (!response.ok) {
-          throw new Error('无法加载图片');
+          throw new Error(`请求失败，状态码：${response.status}`);
         }
 
         // 获取纯文本内容并拆分为链接数组
         const text = await response.text();
+        console.log('API 返回内容：', text); // 调试信息
         const links = text.split('\n').filter(link => link.trim() !== '');
+
+        // 检查链接是否有效
+        if (links.length === 0) {
+          throw new Error('未找到图片链接');
+        }
 
         // 将图片链接展示在页面上
         links.forEach(link => {
           const img = document.createElement('img');
           img.src = link;
           img.alt = 'Pixiv 图片';
+          img.onerror = () => {
+            console.error('图片加载失败：', link); // 调试信息
+          };
           gallery.appendChild(img);
         });
       } catch (error) {
         // 如果出错，显示错误信息
-        gallery.innerHTML = `<p style="color: red; text-align: center;">${error.message}</p>`;
+        console.error('加载图片时出错：', error); // 调试信息
+        error.textContent = error.message;
+        error.style.display = 'block';
       } finally {
         // 隐藏加载提示
         loading.style.display = 'none';
