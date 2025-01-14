@@ -44,6 +44,10 @@
       gap: 10px; /* 图片间距 */
       justify-content: center;
     }
+    .gallery a {
+      display: block;
+      text-decoration: none;
+    }
     .gallery img {
       width: 100%; /* 图片宽度占满容器 */
       height: auto; /* 高度自适应 */
@@ -112,13 +116,19 @@
 
         // 将图片链接展示在页面上
         links.forEach(link => {
+          const anchor = document.createElement('a');
+          anchor.href = link; // 设置跳转链接
+          anchor.target = '_blank'; // 在新标签页打开
+
           const img = document.createElement('img');
           img.src = link;
           img.alt = 'Pixiv 图片';
           img.onerror = () => {
             console.error('图片加载失败：', link); // 调试信息
           };
-          gallery.appendChild(img);
+
+          anchor.appendChild(img);
+          gallery.appendChild(anchor);
         });
       } catch (error) {
         // 如果出错，显示错误信息
