@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixiv 排行榜图片展示</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .buttons {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .buttons button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    .buttons button:hover {
+      background-color: #0056b3;
+    }
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+    }
+    .gallery img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 5px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+    .gallery img:hover {
+      transform: scale(1.05);
+    }
+    .loading {
+      text-align: center;
+      font-size: 18px;
+      color: #666;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Pixiv 排行榜图片展示</h1>
+  <div class="buttons">
+    <button onclick="loadImages('m')">月榜</button>
+    <button onclick="loadImages('w')">周榜</button>
+    <button onclick="loadImages('d')">日榜</button>
+    <button onclick="loadImages('n')">新人榜</button>
+  </div>
+  <div class="gallery" id="gallery"></div>
+  <div class="loading" id="loading" style="display: none;">加载中...</div>
+
+  <script>
+    // 加载图片的函数
+    async function loadImages(type) {
+      // 显示加载提示
+      const loading = document.getElementById('loading');
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = ''; // 清空当前内容
+      loading.style.display = 'block';
+
+      try {
+        // 调用 API 获取图片链接
+        const response = await fetch(`https://pxrank-api.onani.cn/${type}`);
+        if (!response.ok) {
+          throw new Error('无法加载图片');
+        }
+
+        // 获取纯文本内容并拆分为链接数组
+        const text = await response.text();
+        const links = text.split('\n').filter(link => link.trim() !== '');
+
+        // 将图片链接展示在页面上
+        links.forEach(link => {
+          const img = document.createElement('img');
+          img.src = link;
+          img.alt = 'Pixiv 图片';
+          gallery.appendChild(img);
+        });
+      } catch (error) {
+        // 如果出错，显示错误信息
+        gallery.innerHTML = `<p style="color: red; text-align: center;">${error.message}</p>`;
+      } finally {
+        // 隐藏加载提示
+        loading.style.display = 'none';
+      }
+    }
+
+    // 默认加载周榜
+    loadImages('w');
+  </script>
+</body>
+</html>
